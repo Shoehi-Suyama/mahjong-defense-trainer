@@ -76,8 +76,11 @@ npm run build     # 型チェック + 本番ビルド
 
 ## デプロイ
 
+公開先: **https://shoehi-suyama.github.io/mahjong-defense-trainer/**
+
 `main` への push で `.github/workflows/deploy.yml` が `npm test` → `npm run build` →
-GitHub Pages へ公開する。GitHub リポジトリ側で Pages を「GitHub Actions」に設定しておく。
+GitHub Pages へ自動公開する（リポジトリ Settings → Pages の Source は「GitHub Actions」）。
+成績は端末ごとに `localStorage` 保存のため、PC とスマホで別々になる。
 
 ## 今後
 
