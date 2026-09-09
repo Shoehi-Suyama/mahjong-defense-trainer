@@ -304,9 +304,22 @@ export function analyzeHand(state: GameState): HandAnalysis {
 // ---- 回答判定（仕様 #28, #29） ----
 
 export type Verdict = 'correct' | 'close' | 'wrong';
+/** ◎ 最も安全 / ○ 十分安全 / △ 比較的安全だが危険が残る / × 危険。 */
+export type Grade = 'best' | 'good' | 'ok' | 'bad';
+
+export const GRADE_MARK: Record<Grade, string> = { best: '◎', good: '○', ok: '△', bad: '×' };
+export const GRADE_LABEL: Record<Grade, string> = {
+  best: '最も安全',
+  good: '十分安全',
+  ok: '比較的安全（危険が残る）',
+  bad: '危険',
+};
 
 export interface JudgeResult {
   verdict: Verdict;
+  grade: Grade;
+  mark: string;
+  gradeLabel: string;
   chosen: TileSafety;
   preferred: TileSafety;
   /** 表示用ラベル（例: 「正解」「惜しい」「危険」）。 */
@@ -319,19 +332,19 @@ export function judgeAnswer(state: GameState, chosenTile: TileId): JudgeResult {
     ?? evaluateTileSafety(chosenTile, state);
   const preferred = analysis.ranking.find((r) => r.tile === analysis.preferred)!;
 
-  let verdict: Verdict;
-  let label: string;
-  if (analysis.correctAnswers.includes(chosenTile) || chosen.level === 5) {
-    verdict = 'correct';
-    label = '正解';
-  } else if (chosen.level >= 3 && preferred.level - chosen.level <= 2) {
-    verdict = 'close';
-    label = '惜しい';
-  } else {
-    verdict = 'wrong';
-    label = chosen.level <= 1 ? '危険' : '別の牌が安全';
-  }
-  return { verdict, chosen, preferred, label };
+  let grade: Grade;
+  if (analysis.correctAnswers.includes(chosenTile) || chosen.completeSafety) grade = 'best';
+  else if (chosen.level >= 4) grade = 'good';
+  else if (chosen.level === 3) grade = 'ok';
+  else grade = 'bad';
+
+  const verdict: Verdict = grade === 'bad' ? 'wrong' : grade === 'ok' ? 'close' : 'correct';
+  const label = verdict === 'correct' ? '正解' : verdict === 'close' ? '惜しい' : '危険';
+
+  return {
+    verdict, grade, mark: GRADE_MARK[grade], gradeLabel: GRADE_LABEL[grade],
+    chosen, preferred, label,
+  };
 }
 
 /** 一覧表示用の 1 行サマリ（例: 「現物」「4mのスジ」）。 */

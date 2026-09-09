@@ -23,7 +23,7 @@ export const REASON_LABEL: Record<ReasonCode, string> = {
   all_visible: '4枚見え',
   kabe_nochance: '壁（ノーチャンス）',
   one_chance: 'ワンチャンス',
-  naka_suji: '中スジ',
+  naka_suji: '中スジ（両スジ）',
   suji: '片スジ',
   terminal_suji: '端牌スジ',
   honor_three: '字牌 3枚見え',

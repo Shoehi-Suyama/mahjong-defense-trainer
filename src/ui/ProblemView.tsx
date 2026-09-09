@@ -4,7 +4,6 @@ import {
   doraFromIndicator, doraTiles, sortTileIds, tileLabel, uniqueTiles, type TileId,
 } from '../core/tiles';
 import type { Problem } from '../core/problem';
-import { THEMES } from '../generator/themes';
 import { River, Melds } from './River';
 import Tile from './Tile';
 
@@ -49,7 +48,6 @@ export default function ProblemView({ problem, onAnswer }: Props) {
   return (
     <div className="problem">
       <div className="problem-head">
-        <span className="chip chip-theme">{THEMES[problem.theme as keyof typeof THEMES]?.label ?? problem.theme}</span>
         <span className="chip">{state.round}巡目</span>
         <span className="chip chip-riichi">{threatChip}</span>
         {state.doraIndicators.length > 0 && (

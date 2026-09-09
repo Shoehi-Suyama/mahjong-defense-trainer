@@ -78,6 +78,13 @@ describe('analyzeHand / judgeAnswer', () => {
     expect(judgeAnswer(compound, 'pin3').verdict).toBe('wrong');
   });
 
+  it('◎○△× のグレードを返す', () => {
+    expect(judgeAnswer(compound, 'east').grade).toBe('best');
+    expect(judgeAnswer(compound, 'east').mark).toBe('◎');
+    expect(judgeAnswer(compound, 'man5').grade).toBe('ok');
+    expect(judgeAnswer(compound, 'pin3').grade).toBe('bad');
+  });
+
   it('同程度に安全な現物が2枚あれば両方を正解にする（仕様 #25）', () => {
     const s = state({
       hand: '東 白 man5',

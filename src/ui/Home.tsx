@@ -1,63 +1,53 @@
-import { THEME_ORDER, THEMES, type ThemeId } from '../generator/themes';
 import { accuracy, useStats } from './useStats';
 
 interface Props {
-  onStart: (theme: ThemeId | 'all') => void;
+  /** 実戦練習（テーマ非表示のランダム出題）を開始する。 */
+  onStartPractice: () => void;
   onStartPushFold: () => void;
   onStartLive: () => void;
   onLearn: () => void;
   onStats: () => void;
 }
 
-export default function Home({ onStart, onStartPushFold, onStartLive, onLearn, onStats }: Props) {
+export default function Home({ onStartPractice, onStartPushFold, onStartLive, onLearn, onStats }: Props) {
   const { stats } = useStats();
   const pfAcc = accuracy(stats.themes.pushfold);
   const liveAcc = accuracy(stats.themes.live);
+  // 安全牌トレーニング全体の通算（テーマ別は事前に見せない）
+  const drill = { seen: 0, correct: 0, close: 0 };
+  for (const [k, s] of Object.entries(stats.themes)) {
+    if (k === 'pushfold' || k === 'live' || !s) continue;
+    drill.seen += s.seen; drill.correct += s.correct; drill.close += s.close;
+  }
+  const drillAcc = drill.seen > 0 ? (drill.correct + drill.close * 0.5) / drill.seen : null;
 
   return (
     <div className="home">
       <h1 className="home-title">守備判断トレーニング</h1>
       <p className="home-lead">
-        相手の河から情報を取り出し、<strong>なぜこの牌が安全なのか</strong>を考えて切る練習をします。
-        目的は「ベタオリ」— 放銃をできるだけ避けることです。
+        実戦の局面を見て、<strong>自分で安全牌を判断する</strong>練習です。
+        出題テーマ（現物・スジ・壁…）は事前に知らされません。河・場況・手牌から考えて 1 枚選びます。
       </p>
 
-      <h2 className="home-section">安全牌トレーニング</h2>
-      <div className="theme-grid">
-        <button className="theme-btn theme-btn-all" aria-label="全部のテーマで練習" onClick={() => onStart('all')}>
-          <span className="theme-btn-label">全部</span>
-          <span className="theme-btn-desc">全テーマからランダム出題（苦手を重点的に）</span>
-        </button>
-        {THEME_ORDER.map((id) => {
-          const acc = accuracy(stats.themes[id]);
-          return (
-            <button key={id} className="theme-btn" aria-label={`${THEMES[id].label}の練習`} onClick={() => onStart(id)}>
-              <span className="theme-btn-label">{THEMES[id].label}</span>
-              <span className="theme-btn-desc">{THEMES[id].description}</span>
-              <span className="theme-btn-acc">
-                {acc === null ? '未挑戦' : `正解率 ${Math.round(acc * 100)}%`}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <button className="btn-start" onClick={onStartPractice}>
+        実戦開始
+        <span>
+          {drillAcc === null ? 'ランダム出題' : `通算 ${drill.seen} 問・正解率 ${Math.round(drillAcc * 100)}%`}
+        </span>
+      </button>
 
-      <h2 className="home-section">実戦トレーニング</h2>
+      <h2 className="home-section">別モード</h2>
       <div className="theme-grid">
-        <button className="theme-btn" aria-label="押し引きの練習" onClick={onStartPushFold}>
+        <button className="theme-btn" onClick={onStartPushFold}>
           <span className="theme-btn-label">押し引き</span>
-          <span className="theme-btn-desc">
-            テンパイ時に、リーチへ押す（危険牌を切る）か降りるかを期待値の目安で判断する。
-          </span>
+          <span className="theme-btn-desc">テンパイ時に、リーチへ押すか降りるかを期待値の目安で判断する。</span>
           <span className="theme-btn-acc">
             {pfAcc === null ? '未挑戦' : `正解率 ${Math.round(pfAcc * 100)}%`}
           </span>
         </button>
-        <button className="theme-btn" aria-label="実戦形式の練習" onClick={onStartLive}>
-          <span className="theme-btn-label">実戦形式</span>
-          <span className="theme-btn-desc">
-            1局を通して、河が伸びる中で3回続けて守備の判断をする。守備スコアで評価。
-          </span>
+        <button className="theme-btn" onClick={onStartLive}>
+          <span className="theme-btn-label">実戦形式（1局通し）</span>
+          <span className="theme-btn-desc">河が伸びる中で 3 回続けて守備の判断をする。守備スコアで評価。</span>
           <span className="theme-btn-acc">
             {liveAcc === null ? '未挑戦' : `正解率 ${Math.round(liveAcc * 100)}%`}
           </span>

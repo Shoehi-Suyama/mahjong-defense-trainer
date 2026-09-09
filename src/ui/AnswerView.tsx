@@ -6,6 +6,7 @@ import {
 import { buildComparison, WAIT_LABEL } from '../core/safety/explain';
 import { REASON_LABEL } from '../core/safety/reasons';
 import { doraTiles, tileLabel, type TileId } from '../core/tiles';
+import { THEMES, type ThemeId } from '../generator/themes';
 import Tile from './Tile';
 import SafetyStars from './SafetyStars';
 
@@ -21,7 +22,6 @@ const VERDICT_CLASS: Record<string, string> = {
   close: 'verdict-close',
   wrong: 'verdict-wrong',
 };
-const VERDICT_MARK: Record<string, string> = { correct: '○', close: '△', wrong: '×' };
 
 export default function AnswerView({ problem, chosen, elapsedMs, onNext }: Props) {
   const judge = useMemo(() => judgeAnswer(problem.state, chosen), [problem, chosen]);
@@ -39,11 +39,13 @@ export default function AnswerView({ problem, chosen, elapsedMs, onNext }: Props
   const dora = useMemo(() => doraTiles(problem.state.doraIndicators), [problem.state.doraIndicators]);
   const multiOpp = problem.state.opponents.length > 1;
 
+  const theme = THEMES[problem.theme as ThemeId];
+
   return (
     <div className="answer">
       <div className={`verdict ${VERDICT_CLASS[judge.verdict]}`}>
-        <span className="verdict-mark">{VERDICT_MARK[judge.verdict]}</span>
-        <span className="verdict-label">{judge.label}</span>
+        <span className="verdict-mark">{judge.mark}</span>
+        <span className="verdict-label">{judge.gradeLabel}</span>
         <span className="verdict-time">回答時間 {(elapsedMs / 1000).toFixed(1)}秒</span>
       </div>
 
@@ -51,11 +53,13 @@ export default function AnswerView({ problem, chosen, elapsedMs, onNext }: Props
         <TileCard
           title="あなたの回答"
           safety={chosenSafety}
-          mark={judge.verdict === 'correct' ? 'correct' : 'chosen-wrong'}
+          mark={judge.grade === 'best' || judge.grade === 'good'
+            ? 'correct'
+            : judge.grade === 'bad' ? 'chosen-wrong' : undefined}
           dora={dora.has(chosen)}
         />
         <TileCard
-          title="おすすめ"
+          title="最も安全な牌"
           safety={prefSafety}
           mark="preferred"
           dora={dora.has(preferred)}
@@ -64,6 +68,13 @@ export default function AnswerView({ problem, chosen, elapsedMs, onNext }: Props
             : undefined}
         />
       </div>
+
+      {theme && (
+        <section className="explain-block point-block">
+          <h3>今回のポイント：{theme.label}</h3>
+          <p className="explain-text">{theme.description}</p>
+        </section>
+      )}
 
       <section className="explain-block">
         <h3>【理由】なぜ {tileLabel(preferred)} が安全か</h3>
@@ -136,7 +147,7 @@ export default function AnswerView({ problem, chosen, elapsedMs, onNext }: Props
 }
 
 function TileCard({ title, safety, mark, extra, dora }: {
-  title: string; safety: TileSafety; mark: 'correct' | 'preferred' | 'chosen-wrong';
+  title: string; safety: TileSafety; mark?: 'correct' | 'preferred' | 'chosen-wrong';
   extra?: string; dora?: boolean;
 }) {
   return (
