@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from 'react';
 import { tileLabel, type TileId } from '../core/tiles';
 import TileFace from './tileFace';
+import { useTileImages } from './useTileImages';
 
 export type TileSize = 'sm' | 'md' | 'lg';
 
@@ -23,6 +24,9 @@ interface TileProps {
 export default function Tile({
   id, size = 'md', red = false, onSelect, selected = false, disabled = false, mark, rotated = false, dora = false,
 }: TileProps) {
+  const images = useTileImages();
+  const src = images?.get(id);
+
   const clickable = !!onSelect && !disabled;
   const cls = [
     'tile', `tile-${size}`,
@@ -47,12 +51,16 @@ export default function Tile({
       className={cls}
       onClick={activate}
       onKeyDown={onKey}
-      role={clickable ? 'button' : undefined}
+      role={clickable ? 'button' : 'img'}
+      aria-label={clickable ? `${tileLabel(id)}を切る` : (red ? `赤${tileLabel(id)}` : tileLabel(id))}
       tabIndex={clickable ? 0 : undefined}
-      aria-label={clickable ? `${tileLabel(id)}を切る` : undefined}
       aria-pressed={clickable ? selected : undefined}
     >
-      <TileFace id={id} red={red} />
+      <span className="tile-frame">
+        {src
+          ? <img className="tile-img" src={src} alt="" draggable={false} />
+          : <TileFace id={id} red={red} />}
+      </span>
       {dora && <span className="tile-dora-badge" aria-hidden="true">ドラ</span>}
     </span>
   );

@@ -126,11 +126,22 @@ button { font-family: inherit; }
 
 /* ---------- Tiles ---------- */
 .tile {
+  --tile-w: 42px;
   position: relative;
-  display: inline-flex; align-items: center; justify-content: center;
-  border-radius: 7px; user-select: none; flex: none;
+  display: inline-block; width: var(--tile-w);
+  user-select: none; flex: none;
   filter: drop-shadow(0 1px 1px rgba(0,0,0,.28));
 }
+/* 牌の枠。点数計算アプリと同じ牌画像（IMG_5688.jpeg）を切り出して表示する。 */
+.tile-frame {
+  display: block; width: 100%; aspect-ratio: 60 / 74;
+  background: #fff; border: 1px solid #c9c4b8; border-radius: 6px;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,.08); overflow: hidden;
+}
+.tile-frame .tile-img,
+.tile-frame .tile-face { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.tile-dora .tile-frame { border-color: #d9a441; box-shadow: inset 0 0 0 1px #d9a441; }
 .tile-dora .tile-face-bg { fill: #fff7e0; stroke: #d9a441; }
 .tile-dora-badge {
   position: absolute; top: -6px; right: -6px; z-index: 1;
@@ -138,16 +149,15 @@ button { font-family: inherit; }
   line-height: 1; padding: 2px 3px; border-radius: 4px;
 }
 .tile-sm .tile-dora-badge { font-size: 7px; top: -4px; right: -4px; }
-.tile-face { display: block; width: 100%; height: 100%; }
 .tile-face-bg { fill: var(--ivory); stroke: var(--ivory-edge); stroke-width: 1.5; }
 .tile-glyph { text-anchor: middle; font-weight: 800; font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; }
 .tile-glyph-num { font-size: 40px; }
 .tile-glyph-suit { font-size: 20px; }
 .tile-glyph-honor { font-size: 34px; }
 
-.tile-sm { width: 28px; height: 39px; }
-.tile-md { width: 40px; height: 56px; }
-.tile-lg { width: 52px; height: 73px; }
+.tile-sm { --tile-w: 30px; }
+.tile-md { --tile-w: 42px; }
+.tile-lg { --tile-w: 54px; }
 
 .tile-clickable { cursor: pointer; transition: transform .06s, outline-color .1s; outline: 2px solid transparent; outline-offset: 2px; }
 .tile-clickable:hover { transform: translateY(-3px); }
@@ -338,5 +348,5 @@ button { font-family: inherit; }
 @media (max-width: 420px) {
   .theme-grid { grid-template-columns: 1fr; }
   .answer-cards, .pf-actions, .pf-verdict-cards { grid-template-columns: 1fr; }
-  .tile-md { width: 36px; height: 50px; }
+  .tile-md { --tile-w: 38px; }
 }
